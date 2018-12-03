@@ -11,6 +11,8 @@ from tencentcloud.common import credential
 from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.tmt.v20180321 import tmt_client, models
 import json
+import re
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -35,7 +37,7 @@ class Ui_MainWindow(object):
         # MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
-        self.pushButton.clicked.connect(MainWindow.trans)
+        self.pushButton.clicked.connect(MainWindow.trans) # 添加按键点击判断事件
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -56,10 +58,11 @@ class mywindow(QtWidgets.QWidget, Ui_MainWindow):
 
         if content:
             contentList = content.split("\n")
+            # print(contentList)
             resultData = []
             for inputData in contentList:
-                SecretId = "AKIDNbigT4ylqjQxMdDcN7jAPSKVehy9F5mI"
-                SecretKey = "VpYt6A2ykNp6Gl6HJCtPkt43b3NWTHvP"
+                SecretId = "AKIDkLoCSYPchcMvMhL01ylNo7I5Jk7JLCxY"
+                SecretKey = "c5FzaDqRs8ECzbaTGFSXXM3jHj3Cg2GJ"
                 cred = credential.Credential(SecretId, SecretKey)
 
                 client = tmt_client.TmtClient(cred, "ap-guangzhou")
@@ -70,6 +73,7 @@ class mywindow(QtWidgets.QWidget, Ui_MainWindow):
                     Text	是	String	待识别的文本
                     ProjectId	是	Integer	项目id
                 '''
+                # language_content = re.f
                 params = """{
                             "Text": "%s",
                             "ProjectId": 1
@@ -81,13 +85,16 @@ class mywindow(QtWidgets.QWidget, Ui_MainWindow):
 
                 # 进行英汉互译
                 fromLang = json.loads(resp.to_json_string())["Lang"]
+                print('=====', fromLang)
                 toLang = None
                 if fromLang == "en":
                     toLang = "zh"
                 elif fromLang == "zh":
                     toLang = "en"
                 else:
-                    self.textEdit_2.setText("请输入英文或者中文，本软件暂不支持其他语言的翻译！")
+                    # print ('=====')
+                    self.textEdit_2.setText("请输入英文或者中文，本软件暂不支持其他语言的翻译！") # 存在bug,这句执行结果不能在文本框中显示
+                    # print ('+++')
                     break
 
                 if toLang:
@@ -112,10 +119,12 @@ class mywindow(QtWidgets.QWidget, Ui_MainWindow):
 
                     resultData.append(json.loads(resp.to_json_string())["TargetText"])
             self.textEdit_2.setText("\n".join(resultData))
+        else:
+            self.textEdit_2.setText ("请输入翻译内容！")
 
 import sys
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     myshow = mywindow()
-    myshow.show()
-    sys.exit(app.exec_())
+    myshow.show() # 展示图形
+    sys.exit(app.exec_()) # 退出
